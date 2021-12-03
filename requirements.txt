@@ -1,0 +1,20 @@
+# Code quality
+black
+mypy
+pytest
+flake8
+
+# Standard utility packages
+numpy
+matplotlib
+seaborn
+pandas
+ipykernel
+ipywidgets
+tqdm
+
+# Learning packages
+torch >= 1.9.0
+
+# Autodiff
+jax[cpu]
