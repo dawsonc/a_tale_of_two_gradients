@@ -109,7 +109,7 @@ def stochastic_approx_gradient_descent(
     cost = f(decision_vars)
     cost_trace.append(cost)
     decision_var_trace.append(decision_vars)
-    plotting_cb(decision_vars)
+    plotting_cb(n_steps, decision_vars, cost_trace)
 
     # Return the desired information
     return decision_vars, cost_trace, decision_var_trace
