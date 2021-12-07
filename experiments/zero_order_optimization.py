@@ -77,6 +77,10 @@ def flip_box_one_finger():
         sim_fig.savefig(save_dir + f"/iter_{i:03}_sim.png")
         cost_fig.savefig(save_dir + "/cost_trace.png")
 
+        # Clean up
+        plt.close(sim_fig)
+        plt.close(cost_fig)
+
     # Run the optimization
     setpoint, cost_trace, setpoint_trace = stochastic_approx_gradient_descent(
         box_flip_cost,
@@ -107,9 +111,9 @@ def grasp_box_two_fingers():
     setpoints0 = jnp.array([-0.05, 0.25, 0.05, 0.25])
 
     # Set up some details for a gradient-descent-based optimization
-    n_gd_steps = 30
-    gd_step_size = 1e0
-    perturbation_stddev = 0.5
+    n_gd_steps = 500
+    gd_step_size = 0.25
+    perturbation_stddev = 0.2
     random_seed = 0
 
     # Set up some variables we'll reuse for simulations
@@ -117,7 +121,7 @@ def grasp_box_two_fingers():
     fs1_initial = jnp.array([-0.3, 0.25, 0.0, 0.0])
     fs2_initial = jnp.array([0.3, 0.25, 0.0, 0.0])
     finger_k = 40
-    n_sim_steps = 200
+    n_sim_steps = 500
 
     # Define the cost function
     def box_grasp_cost(finger_commands):
@@ -144,8 +148,9 @@ def grasp_box_two_fingers():
             n_sim_steps,
         )
 
-        # Make a cost with terminal cost telling us to lift to y = 1.0
-        cost = (bs_trace[-1, 1] - 1.0) ** 2
+        # Make a cost with terminal cost telling us to lift to y = 1.0 and stop there
+        target_state = jnp.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
+        cost = jnp.sum((bs_trace[-1, :] - target_state) ** 2)
 
         return cost
 
@@ -181,8 +186,12 @@ def grasp_box_two_fingers():
         current_file_dir = os.path.dirname(os.path.abspath(__file__))
         save_dir = current_file_dir + "/results/optimization/grasp/zero_order"
         os.makedirs(save_dir, exist_ok=True)
-        sim_fig.savefig(save_dir + f"/iter_{i:03}_sim.png")
+        sim_fig.savefig(save_dir + f"/iter_{i:04}_sim.png")
         cost_fig.savefig(save_dir + "/cost_trace.png")
+
+        # Clean up
+        plt.close(sim_fig)
+        plt.close(cost_fig)
 
     # Run the optimization
     setpoints, cost_trace, setpoints_trace = stochastic_approx_gradient_descent(
@@ -210,8 +219,8 @@ def grasp_box_two_fingers():
 
 
 if __name__ == "__main__":
-    print("Optimizing: one finger flip...")
-    flip_box_one_finger()
+    # print("Optimizing: one finger flip...")
+    # flip_box_one_finger()
 
     print("Optimizing: two finger grasp...")
     grasp_box_two_fingers()
