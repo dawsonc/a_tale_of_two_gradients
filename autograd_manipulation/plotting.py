@@ -4,6 +4,7 @@ import jax
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.transforms as transforms
+from matplotlib.animation import FuncAnimation
 
 
 def make_box_patches(box_state, alpha, box_side_length, ax):
@@ -233,3 +234,116 @@ def plot_cost_landscape(f, var_min, var_max, grid_size, xlabel, ylabel):
     fig.colorbar(contours)
 
     return fig
+
+
+def animate_box_finger(bs_trace, fs_trace, fs_desired_trace):
+    """Animate the trajectory of a box and a finger.
+
+    Returns the animation object
+
+    args:
+        bs_trace: n_sim_steps x 6 jnp.array of box states over time
+        fs_trace: n_sim_steps x 4 jnp.array of finger states over time
+        fs_desired_trace: n_sim_steps x 2 jnp.array of finger setpoints over time
+    """
+    # Make the plots
+    fig, ax = plt.subplots(figsize=(5, 5))
+
+    # Set the framerate of the animation
+    scale = 10  # only show every N frames
+    interval = 5.0 * scale  # ms
+
+    def animate(i):
+        ax.clear()
+
+        # Plot the center of mass trajectory
+        ax.plot(bs_trace[: i * scale, 0], bs_trace[: i * scale, 1], label="box")
+        ax.plot(fs_trace[: i * scale, 0], fs_trace[: i * scale, 1], label="finger")
+        ax.plot(fs_desired_trace[:, 0], fs_desired_trace[:, 1], "-o", label="setpoint")
+
+        # Plot the current state of the box and finger
+        make_box_patches(bs_trace[i * scale], 1.0, 0.5, ax)
+        make_finger_patches(fs_trace[i * scale], 1.0, ax)
+
+        # Label etc.
+        ax.set_xlabel("x")
+        ax.set_ylabel("z")
+        ax.set_xlim([-1.5, 0.4])
+        ax.set_ylim([-0.1, 1.0])
+        ax.set_aspect("equal")
+        ax.legend(loc="lower right")
+
+    # Show the animation
+    n_steps = bs_trace.shape[0]
+    anim = FuncAnimation(fig, animate, interval=interval, frames=n_steps // scale)
+
+    return anim
+
+
+def animate_box_fingers(
+    bs_trace, fs1_trace, fs1_desired_trace, fs2_trace, fs2_desired_trace
+):
+    """Animate the trajectory of a box and two fingers.
+
+    Creates and returns an animation object (but does not show it)
+
+    args:
+        bs_trace: n_sim_steps x 6 jnp.array of box states over time
+        fs1_trace: n_sim_steps x 4 jnp.array of finger 1 states over time
+        fs1_desired_trace: n_sim_steps x 2 jnp.array of finger 1 setpoints over time
+        fs1_trace: n_sim_steps x 4 jnp.array of finger 2 states over time
+        fs1_desired_trace: n_sim_steps x 2 jnp.array of finger 2 setpoints over time
+    returns:
+        an animation object
+    """
+    # Make the plots
+    fig, ax = plt.subplots(figsize=(5, 5))
+
+    # Set the framerate of the animation
+    scale = 10  # only show every N frames
+    interval = 5.0 * scale  # ms
+
+    def animate(i):
+        ax.clear()
+
+        # Plot the center of mass trajectory
+        ax.plot(bs_trace[: i * scale, 0], bs_trace[: i * scale, 1], label="box")
+        ax.plot(
+            fs1_trace[: i * scale, 0],
+            fs1_trace[: i * scale, 1],
+            color="orange",
+            label="finger",
+        )
+        ax.plot(fs2_trace[: i * scale, 0], fs2_trace[: i * scale, 1], color="orange")
+        ax.plot(
+            fs1_desired_trace[: i * scale, 0],
+            fs1_desired_trace[: i * scale, 1],
+            "-o",
+            color="green",
+            label="setpoint",
+        )
+        ax.plot(
+            fs2_desired_trace[: i * scale, 0],
+            fs2_desired_trace[: i * scale, 1],
+            "-o",
+            color="green",
+        )
+
+        # Plot the current state of the box and finger
+        make_box_patches(bs_trace[i * scale], 1.0, 0.5, ax)
+        make_finger_patches(fs1_trace[i * scale], 1.0, ax)
+        make_finger_patches(fs2_trace[i * scale], 1.0, ax)
+
+        # Label etc.
+        ax.set_xlabel("x")
+        ax.set_ylabel("z")
+        ax.set_xlim([-0.6, 0.6])
+        ax.set_ylim([-0.1, 1.2])
+        ax.set_aspect("equal")
+        ax.legend(loc="lower left")
+
+    # Show the animation
+    n_steps = bs_trace.shape[0]
+    anim = FuncAnimation(fig, animate, interval=interval, frames=n_steps // scale)
+
+    return anim

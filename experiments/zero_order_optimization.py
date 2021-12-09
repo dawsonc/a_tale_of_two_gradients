@@ -111,9 +111,9 @@ def grasp_box_two_fingers():
     setpoints0 = jnp.array([-0.05, 0.25, 0.05, 0.25])
 
     # Set up some details for a gradient-descent-based optimization
-    n_gd_steps = 500
-    gd_step_size = 0.25
-    perturbation_stddev = 0.2
+    n_gd_steps = 1000
+    gd_step_size = 0.5
+    perturbation_stddev = 0.1
     random_seed = 0
 
     # Set up some variables we'll reuse for simulations
@@ -150,12 +150,17 @@ def grasp_box_two_fingers():
 
         # Make a cost with terminal cost telling us to lift to y = 1.0 and stop there
         target_state = jnp.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
-        cost = jnp.sum((bs_trace[-1, :] - target_state) ** 2)
+        cost_weights = jnp.array([0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
+        cost = jnp.sum(cost_weights * (bs_trace[-1, :] - target_state) ** 2)
 
         return cost
 
     # Make the plotting callback
     def plotting_cb(i, decision_vars, cost_trace):
+        print(i)
+        if i % 10 != 0:
+            return
+
         fs1_desired_trace = jnp.zeros((n_sim_steps, 2))
         fs1_desired_trace = fs1_desired_trace.at[:, 0].add(decision_vars[0])
         fs1_desired_trace = fs1_desired_trace.at[:, 1].add(decision_vars[1])

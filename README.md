@@ -1,5 +1,5 @@
 # A Tale of Two Gradients
-Testing gradient-based optimization for manipulation
+Exploring gradient-based optimization for manipulation. For more information, see our video [here](https://youtu.be/GpS5OB7l-dY) and report in `report.pdf`.
 
 ## Installation
 
@@ -14,7 +14,11 @@ pip install -e .
 pip install -r requirements.txt
 ```
 
-If you want to run in Jupyter notebooks, you also need to install the kernel
-```bash
-python -m ipykernel install --user --name=autograd_manipulation_env
-```
+## Running
+
+All experiments can be run from the `experiments` directory, and will save their progress in `experiments/results`.
+
+- `python experiments/first_order_optimization.py` will solve both the box flipping and box grasping tasks using gradient descent with exact gradients.
+- `python experiments/zero_order_optimization.py` will solve both the box flipping and box grasping tasks using gradient descent with stochastically approximated gradients. 
+- `python experiments/cost_landscape.py` will save plots of the cost landscape for both problems.
+- `python experiments/plot_results.py` will generate the plots and animations used in our report and video.

@@ -3,6 +3,7 @@ import jax.numpy as jnp
 import os
 import matplotlib.pyplot as plt
 import pickle
+import time
 
 from autograd_manipulation.sim import (
     box_single_finger_simulate,
@@ -143,7 +144,8 @@ def grasp_box_two_fingers():
 
         # Make a cost with terminal cost telling us to lift to y = 1.0 and stop there
         target_state = jnp.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
-        cost = jnp.sum((bs_trace[-1, :] - target_state) ** 2)
+        cost_weights = jnp.array([0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
+        cost = jnp.sum(cost_weights * (bs_trace[-1, :] - target_state) ** 2)
 
         return cost
 
@@ -209,8 +211,8 @@ def grasp_box_two_fingers():
 
 
 if __name__ == "__main__":
-    # print("Optimizing: one finger flip...")
-    # flip_box_one_finger()
+    print("Optimizing: one finger flip...")
+    flip_box_one_finger()
 
-    print("Optimizing: two finger grasp...")
-    grasp_box_two_fingers()
+    # print("Optimizing: two finger grasp...")
+    # grasp_box_two_fingers()
